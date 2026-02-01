@@ -1,0 +1,71 @@
+id: postgres_taxi_data
+namespace: zoomcamp
+
+inputs:
+  - id: taxi
+    type: SELECT
+    values: [yellow, green]
+    defaults: yellow
+  - id: year
+    type: SELECT
+    values: ["2020", "2021"]
+    defaults: "2020"
+  - id: month
+    type: SELECT
+    values: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+    defaults: "01"
+
+tasks:
+  - id: download_data
+    type: io.kestra.plugin.core.http.Download
+    uri: "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/{{inputs.taxi}}/{{inputs.taxi}}_tripdata_{{inputs.year}}-{{inputs.month}}.csv.gz"
+
+  - id: decompress_file
+    type: io.kestra.plugin.scripts.shell.Commands
+    runner: PROCESS
+    commands:
+      - gunzip -c {{outputs.download_data.uri}} > taxi_data.csv
+    outputFiles:
+      - taxi_data.csv
+
+  - id: create_table
+    type: io.kestra.plugin.jdbc.postgresql.Query
+    url: jdbc:postgresql://postgres:5432/kestra
+    username: kestra
+    password: kestra_password
+    sql: |
+      {% if inputs.taxi == 'yellow' %}
+      CREATE TABLE IF NOT EXISTS yellow_tripdata (
+          VendorID INT, tpep_pickup_datetime TIMESTAMP, tpep_dropoff_datetime TIMESTAMP,
+          passenger_count DOUBLE PRECISION, trip_distance DOUBLE PRECISION, RatecodeID DOUBLE PRECISION,
+          store_and_fwd_flag TEXT, PULocationID INT, DOLocationID INT, payment_type INT,
+          fare_amount DOUBLE PRECISION, extra DOUBLE PRECISION, mta_tax DOUBLE PRECISION,
+          tip_amount DOUBLE PRECISION, tolls_amount DOUBLE PRECISION, improvement_surcharge DOUBLE PRECISION,
+          total_amount DOUBLE PRECISION, congestion_surcharge DOUBLE PRECISION
+          -- airport_fee намеренно пропущен, так как его нет в начале 2020 года
+      );
+      {% else %}
+      CREATE TABLE IF NOT EXISTS green_tripdata (
+          VendorID INT, lpep_pickup_datetime TIMESTAMP, lpep_dropoff_datetime TIMESTAMP,
+          store_and_fwd_flag TEXT, RatecodeID DOUBLE PRECISION, PULocationID INT, DOLocationID INT,
+          passenger_count DOUBLE PRECISION, trip_distance DOUBLE PRECISION, fare_amount DOUBLE PRECISION,
+          extra DOUBLE PRECISION, mta_tax DOUBLE PRECISION, tip_amount DOUBLE PRECISION,
+          tolls_amount DOUBLE PRECISION, ehail_fee DOUBLE PRECISION, improvement_surcharge DOUBLE PRECISION,
+          total_amount DOUBLE PRECISION, payment_type INT, trip_type DOUBLE PRECISION, congestion_surcharge DOUBLE PRECISION
+      );
+      {% endif %}
+
+  - id: upload_to_postgres
+    type: io.kestra.plugin.jdbc.postgresql.CopyIn
+    url: jdbc:postgresql://postgres:5432/kestra
+    username: kestra
+    password: kestra_password
+    table: "{{inputs.taxi}}_tripdata"
+    from: "{{outputs.decompress_file.outputFiles['taxi_data.csv']}}"
+    format: CSV
+    header: true
+    delimiter: ","
+
+  - id: purge_files
+    type: io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles
+    
