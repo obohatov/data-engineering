@@ -221,3 +221,4 @@ my-creds.json
 *.zip
 *.tmp
 tmp.tmp/
+.vscode/
