@@ -1,0 +1,28 @@
+name: 'taxi_rides_ny'
+version: '1.0.0'
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'taxi_rides_ny'
+
+# These configurations specify where dbt should look for different types of files.
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:         
+  - "target"
+  - "dbt_packages"
+
+# Configuring models
+# All settings under this logical node apply to the models in this project
+models:
+  taxi_rides_ny:
+    # Staging models will be created as views
+    staging:
+      +materialized: view
+    # Core analytical models will be created as tables for better performance
+    core:
+      +materialized: view

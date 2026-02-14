@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: staging
+    # The meta block defines the location of external parquet files for DuckDB
+    meta:
+      external_location: "../data/{name}_tripdata_*.parquet"
+    tables:
+      - name: green
+      - name: yellow
+      - name: fhv

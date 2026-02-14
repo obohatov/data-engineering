@@ -1,0 +1,7 @@
+taxi_rides_ny:
+  outputs:
+    dev:
+      type: duckdb
+      path: dev.duckdb
+      threads: 1
+  target: dev

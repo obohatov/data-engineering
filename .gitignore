@@ -209,3 +209,15 @@ __marimo__/
 *.parquet
 *.db
 my-creds.json
+
+# Module 4
+04-analytics-engineering/data/*.parquet
+04-analytics-engineering/taxi_rides_ny/dev.duckdb
+04-analytics-engineering/taxi_rides_ny/dev.duckdb.wal
+04-analytics-engineering/taxi_rides_ny/target/
+04-analytics-engineering/taxi_rides_ny/dbt_packages/
+04-analytics-engineering/taxi_rides_ny/logs/
+
+*.zip
+*.tmp
+tmp.tmp/
