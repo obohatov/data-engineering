@@ -222,3 +222,7 @@ my-creds.json
 *.tmp
 tmp.tmp/
 .vscode/
+.bruin.yml
+logs/runs
+logs/*.log
+*.py[cod]
