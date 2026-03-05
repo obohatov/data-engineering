@@ -226,3 +226,7 @@ tmp.tmp/
 logs/runs
 logs/*.log
 *.py[cod]
+
+.venv/
+*.duckdb
+__pycache__/
