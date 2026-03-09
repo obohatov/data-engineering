@@ -230,3 +230,9 @@ logs/*.log
 .venv/
 *.duckdb
 __pycache__/
+
+*.parquet
+*.csv
+*.gz
+yellow_2025_11_repartitioned/
+__pycache__/
